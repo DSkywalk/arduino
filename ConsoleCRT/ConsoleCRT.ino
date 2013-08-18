@@ -35,8 +35,6 @@
 
 // Delay: decimal us
 #define DELAY_03  __asm __volatile ("nop\n\t""nop\n\t""nop\n\t""nop\n\t") // 0.25 - 1 ~ 4
-#define DELAY_035 __asm __volatile ("nop\n\t""nop\n\t""nop\n\t""nop\n\t""nop\n\t") // 3.125 - 1 ~ 5
-#define DELAY_065 __asm __volatile ("nop\n\t""nop\n\t""nop\n\t""nop\n\t""nop\n\t""nop\n\t""nop\n\t""nop\n\t""nop\n\t") // 0.5625 - 1 ~ 9
 #define DELAY_07  __asm __volatile ("nop\n\t""nop\n\t""nop\n\t""nop\n\t""nop\n\t""nop\n\t""nop\n\t""nop\n\t""nop\n\t""nop\n\t") // 0.625 - 1 ~ 10
 
 // Video out voltage levels
@@ -73,9 +71,8 @@ int val;
 
 void setup() {
   #ifndef DEBUG
-  cli(); // interrupt mode off -- we need a quick cpu.
+  cli(); // interrupt mode off -- we need all cpu for the demo.
   #else
-  // put your setup code here, to run once:
   Serial.begin(9600);
   Serial.println("SETUP STARTS!");
   #endif
@@ -94,7 +91,7 @@ void setup() {
 
 
 void loop() {
- //register unsigned -- changed vars with i have more time to later anim.
+ //register unsigned -- how many registers can i use on the nano device?
   
  register unsigned time;
  register int line = 0;
@@ -105,7 +102,7 @@ void loop() {
     for( line = 0; line < DISPLAY_LINES;)
     {
       #ifdef DEBUG
-        time = micros();
+        time = micros(); //get time
       #endif
       
       hsync_pulse();
@@ -118,7 +115,7 @@ void loop() {
  
       #ifdef DEBUG
         time = micros() - time;
-        Serial.println(time, DEC);
+        Serial.println(time, DEC); // print time spend
         delay(1000);
       #endif
     }
