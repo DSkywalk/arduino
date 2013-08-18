@@ -30,7 +30,7 @@
 // -- on debug mode we use interrups that made the video do not work correctly. No worry, measure times and comment again.
 //#define DEBUG 1
 
-// NOP = 1 cicle = 1/16 us = 62.5ns = 6.25ms
+// NOP = 1 cicle = 1/16 us = 62.5ns = 0.0625ms
 #define NOP __asm __volatile ("nop")
 
 // Delay: decimal us
