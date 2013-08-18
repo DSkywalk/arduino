@@ -21,13 +21,16 @@
 /*          and Javier Valcarce Personal Website at:                                        */
 /*              http://www.javiervalcarce.eu/wiki/TV_Video_Signal_Generator_with_Arduino    */
 /*                                                                                          */
+/*   This code is tested on Amstrad CM14 Colour Monitor (Pal50Hz - 15.625Khz)               */
+/*    * Not tested on regular TV sets yet *                                                 */
+/*                                                                                          */
 /********************************************************************************************/
 
-// -- usalo para medir tiempos y ajustar la syncro
-// -- en modo debug no se vera el video correctamente, ya que no puedes usar el modo cli.
+// -- use debug to check time spend, adjust syncro, etc...
+// -- on debug mode we use interrups that made the video do not work correctly. No worry, measure times and comment again.
 //#define DEBUG 1
 
-// NOP = 1 ciclo = 1/16 us = 62.5ns = 6.25ms
+// NOP = 1 cicle = 1/16 us = 62.5ns = 6.25ms
 #define NOP __asm __volatile ("nop")
 
 // Delay: decimal us
@@ -39,7 +42,7 @@
 // Video out voltage levels
 //                 RGBS
 #define _SYNC    0b0000
-#define _BLACK   0b0001 // lo usamos tambien como HSYNC
+#define _BLACK   0b0001 // used like HSYNC too.
 #define _BLUE    0b0011
 #define _GREEN   0b0101
 #define _RED     0b1001
@@ -70,7 +73,7 @@ int val;
 
 void setup() {
   #ifndef DEBUG
-  cli();
+  cli(); // interrupt mode off -- we need a quick cpu.
   #else
   // put your setup code here, to run once:
   Serial.begin(9600);
@@ -91,14 +94,14 @@ void setup() {
 
 
 void loop() {
- //register unsigned -- cambiando a registro gano tiempo por si fuera necesario para animar.
+ //register unsigned -- changed vars with i have more time to later anim.
   
  register unsigned time;
  register int line = 0;
  
  while(1){
-    CRTSyncTop(); // lineas de 1-5
-    // 6-310 (305 lineas):
+    CRTSyncTop(); // lines 1-5
+    // 6-310 (305 lines):
     for( line = 0; line < DISPLAY_LINES;)
     {
       #ifdef DEBUG
@@ -106,12 +109,12 @@ void loop() {
       #endif
       
       hsync_pulse();
-      delayMicroseconds(3); NOP; // sobran 3.5ms
+      delayMicroseconds(3); NOP; // spare 3.5ms
       
       RenderBars();
       line++;
  
-      delayMicroseconds(3); NOP; // sobran 3.5ms
+      delayMicroseconds(3); NOP; // spare 3.5ms
  
       #ifdef DEBUG
         time = micros() - time;
@@ -119,11 +122,11 @@ void loop() {
         delay(1000);
       #endif
     }
-    CRTSyncFooter(); // lineas de 311-312
+    CRTSyncFooter(); // lines 311-312
   }
 }
 
-inline void RenderBars() { // 64ms disponibles
+inline void RenderBars() { // 64ms available
       PORTB = _RED; delayMicroseconds(6);
       PORTB = _BLUE; delayMicroseconds(6);
       PORTB = _GREEN; delayMicroseconds(6);
@@ -135,23 +138,23 @@ inline void RenderBars() { // 64ms disponibles
 }
 
 inline void CRTSyncTop(){
-  // linea 1:
+  // line 1:
   vsync_pulse(); vsync_pulse();
-  // linea 2:
+  // line 2:
   vsync_pulse(); vsync_pulse();
-  // linea 3:
+  // line 3:
   vsync_pulse(); equal_pulse();
-  // linea 4:
+  // line 4:
   equal_pulse(); equal_pulse();
-  // linea 5:
+  // line 5:
   equal_pulse(); equal_pulse();
 }
 
 
 inline void CRTSyncFooter(){
-  // linea 311:
+  // line 311:
   equal_pulse(); equal_pulse();
-  // linea 312:
+  // line 312:
   equal_pulse(); equal_pulse();
 }
 
@@ -191,7 +194,7 @@ inline void hsync_pulse()
   PORTB = _SYNC;
   delayMicroseconds(4); DELAY_07;
      
-  // Back Porch 5.6 microseconds. -- cambiado a 5.7 y ok -- subido el delay un microsegundo mas para tener mas rojo.
+  // Back Porch 5.6 microseconds. -- changed to 5.7 and ok
   PORTB = _BLACK;
   delayMicroseconds(5); DELAY_07;
 }
