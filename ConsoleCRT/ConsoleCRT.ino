@@ -30,6 +30,7 @@ void DrawBars();
 byte frameBuffer[WIDTH];
 // pal video line loop
 byte line;
+int val;
 
 //video pins
 #define SYNC_PIN  8
@@ -44,8 +45,8 @@ byte line;
 void setup() {
   cli();
   // put your setup code here, to run once:
-  //Serial.begin(9600);
-  //Serial.println("SETUP STARTS!");
+  Serial.begin(9600);
+  Serial.println("SETUP STARTS!");
  
   pinMode (SYNC_PIN, OUTPUT);
   pinMode (R_PIN, OUTPUT);
@@ -59,7 +60,8 @@ void setup() {
   line = 0;
 
   //DrawBars();
-  Serial.println("SETUP END!");
+  val = analogRead(6);
+  //Serial.println( val);
 }
 
 void loop() {
@@ -77,27 +79,54 @@ void loop() {
   PORTB = _BLACK;
   delayMicroseconds(0.6+2.5+1.6);
     
-    delayMicroseconds(1); 
-    PORTB = _RED; delayMicroseconds(1); PORTB = _RED; delayMicroseconds(1); PORTB = _RED; delayMicroseconds(1);
-    PORTB = _RED; delayMicroseconds(1); PORTB = _RED; delayMicroseconds(1); PORTB = _RED; delayMicroseconds(1);
-    PORTB = _RED; delayMicroseconds(1); PORTB = _RED; delayMicroseconds(1); PORTB = _RED; delayMicroseconds(1);
+    delayMicroseconds(3); 
+    PORTB = _RED; delayMicroseconds(2); PORTB = _RED; delayMicroseconds(2); PORTB = _RED; delayMicroseconds(2);
+    PORTB = _RED; delayMicroseconds(2); PORTB = _RED; delayMicroseconds(2); PORTB = _RED; delayMicroseconds(2);
+    PORTB = _RED; delayMicroseconds(2); PORTB = _RED; delayMicroseconds(2); PORTB = _RED; delayMicroseconds(2);
 
-    PORTB = _BLUE; delayMicroseconds(1); PORTB = _BLUE; delayMicroseconds(1); PORTB = _BLUE; delayMicroseconds(1);
-    PORTB = _BLUE; delayMicroseconds(1); PORTB = _BLUE; delayMicroseconds(1); PORTB = _BLUE; delayMicroseconds(1);
-    PORTB = _BLUE; delayMicroseconds(1); PORTB = _BLUE; delayMicroseconds(1); PORTB = _BLUE; delayMicroseconds(1);
+    PORTB = _BLUE; delayMicroseconds(2); PORTB = _BLUE; delayMicroseconds(2); PORTB = _BLUE; delayMicroseconds(2);
+    PORTB = _BLUE; delayMicroseconds(2); PORTB = _BLUE; delayMicroseconds(2); PORTB = _BLUE; delayMicroseconds(2);
+    PORTB = _BLUE; delayMicroseconds(2); PORTB = _BLUE; delayMicroseconds(2); PORTB = _BLUE; delayMicroseconds(2);
 
-    PORTB = _GREEN; delayMicroseconds(1); PORTB = _GREEN; delayMicroseconds(1); PORTB = _GREEN; delayMicroseconds(1);
-    PORTB = _GREEN; delayMicroseconds(1); PORTB = _GREEN; delayMicroseconds(1); PORTB = _GREEN; delayMicroseconds(1);
-    PORTB = _GREEN; delayMicroseconds(1); PORTB = _GREEN; delayMicroseconds(1); PORTB = _GREEN; delayMicroseconds(1);
+    PORTB = _GREEN; delayMicroseconds(2); PORTB = _GREEN; delayMicroseconds(2); PORTB = _GREEN; delayMicroseconds(2);
+    PORTB = _GREEN; delayMicroseconds(2); PORTB = _GREEN; delayMicroseconds(2); PORTB = _GREEN; delayMicroseconds(2);
+    PORTB = _GREEN; delayMicroseconds(2); PORTB = _GREEN; delayMicroseconds(2); PORTB = _GREEN; delayMicroseconds(2);
 
-  delayMicroseconds(10);
+  delayMicroseconds(3);
 
   if(line >= DISPLAY_LINES){
     //vsync
     PORTB = _SYNC;
     //delayMicroseconds(1);
-    //delayMicroseconds(analogRead(6));
-    //delayMicroseconds(305);
+    //delayMicroseconds(analogRead(6)+500);
+    delayMicroseconds(val+500);
+    NOPF(); NOPF();NOPF();NOPF();NOPF();NOPF();NOPF();NOPF();NOPF();NOPF();
+    NOPF(); NOPF();NOPF();NOPF();NOPF();NOPF();NOPF();NOPF();NOPF();NOPF();
+    NOPF(); NOPF();NOPF();NOPF();NOPF();NOPF();NOPF();NOPF();NOPF();NOPF();
+    NOPF(); NOPF();NOPF();NOPF();NOPF();NOPF();NOPF();NOPF();NOPF();NOPF();
+    NOPF(); NOPF();NOPF();NOPF();NOPF();NOPF();NOPF();NOPF();NOPF();NOPF();
+    NOPF(); NOPF();NOPF();NOPF();NOPF();NOPF();NOPF();NOPF();NOPF();NOPF();
+    NOPF(); NOPF();NOPF();NOPF();NOPF();NOPF();NOPF();NOPF();NOPF();NOPF();
+    NOPF();NOPF();NOPF();NOPF();NOPF();
+    NOPF();NOPF();NOPF();NOPF();NOPF();
+    NOPF();NOPF();NOPF();NOPF();NOPF();
+    NOPF();NOPF();NOPF();NOPF();NOPF();
+    NOPF();NOPF();NOPF();NOPF();NOPF();
+    NOPF();NOPF();NOPF();NOPF();NOPF();
+    NOPF();NOPF();NOPF();NOPF();NOPF();
+    NOPF();NOPF();NOPF();NOPF();NOPF();
+    NOPF();NOPF();NOPF();NOPF();NOPF();
+    NOPF();NOPF();NOPF();NOPF();NOPF();
+    NOPF();NOPF();NOPF();NOPF();NOPF();
+    NOPF();NOPF();NOPF();NOPF();NOPF();
+    NOPF();NOPF();NOPF();NOPF();NOPF();
+    NOPF();NOPF();NOPF();NOPF();NOPF();
+    NOPF();NOPF();NOPF();NOPF();NOPF();
+    NOPF();NOPF();NOPF();NOPF();NOPF();
+    NOPF();NOPF();NOPF();NOPF();NOPF();
+    NOPF();NOPF();NOPF();NOPF();NOPF();
+
+    //delayMicroseconds(1286.9000);
     line = 0;
   }
 }
