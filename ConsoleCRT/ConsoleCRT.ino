@@ -1,18 +1,45 @@
+/********************************************************************************************/
+/*   ARDUINO NANO - TV 8 COLORES - PAL50HZ                                                  */
+/********************************************************************************************/
+
+/********************************************************************************************/
+/*                                                                                          */
+/*   ARDUINO TO SCART CONNECTOR                                                             */
+/*                                                                                          */
+/*   ARDUINO               SCART                                                            */
+/*   SYNC_PIN ------------ 20                                                               */
+/*   R_PIN    ---[470R]--- 15                                                               */
+/*   G_PIN    ---[470R]--- 11                                                               */
+/*   B_PIN    ---[470R]--- 5                                                                */
+/*   GND      ------------ 17                                                               */
+/*                                                                                          */
+/*   This code is GPLv3 :D                                                                  */
+/*                                                                                          */
+/*   Author: David Colmenero (D_Skywalk) - http://david.dantoine.org                        */
+/*                                                                                          */
+/*   Thanks to Raul Navarro (raulnd@gmail.com)                                              */
+/*          and Javier Valcarce Personal Website at:                                        */
+/*              http://www.javiervalcarce.eu/wiki/TV_Video_Signal_Generator_with_Arduino    */
+/*                                                                                          */
+/********************************************************************************************/
+
+// -- usalo para medir tiempos y ajustar la syncro
+// -- en modo debug no se vera el video correctamente, ya que no puedes usar el modo cli.
 //#define DEBUG 1
 
-// NOP = 1 ciclo = 1/16 us = 62.5ns
+// NOP = 1 ciclo = 1/16 us = 62.5ns = 6.25ms
 #define NOP __asm __volatile ("nop")
 
 // Delay: decimal us
-#define DELAY_03  __asm __volatile ("nop\n\t""nop\n\t""nop\n\t""nop\n\t") // 4.8 - 1 ~ 4
-#define DELAY_035 __asm __volatile ("nop\n\t""nop\n\t""nop\n\t""nop\n\t""nop\n\t") // 5.6 - 1 ~ 5
-#define DELAY_065 __asm __volatile ("nop\n\t""nop\n\t""nop\n\t""nop\n\t""nop\n\t""nop\n\t""nop\n\t""nop\n\t""nop\n\t") // 10.4 - 1 ~ 9
-#define DELAY_07  __asm __volatile ("nop\n\t""nop\n\t""nop\n\t""nop\n\t""nop\n\t""nop\n\t""nop\n\t""nop\n\t""nop\n\t""nop\n\t") // 11.2 - 1 ~ 10
+#define DELAY_03  __asm __volatile ("nop\n\t""nop\n\t""nop\n\t""nop\n\t") // 0.25 - 1 ~ 4
+#define DELAY_035 __asm __volatile ("nop\n\t""nop\n\t""nop\n\t""nop\n\t""nop\n\t") // 3.125 - 1 ~ 5
+#define DELAY_065 __asm __volatile ("nop\n\t""nop\n\t""nop\n\t""nop\n\t""nop\n\t""nop\n\t""nop\n\t""nop\n\t""nop\n\t") // 0.5625 - 1 ~ 9
+#define DELAY_07  __asm __volatile ("nop\n\t""nop\n\t""nop\n\t""nop\n\t""nop\n\t""nop\n\t""nop\n\t""nop\n\t""nop\n\t""nop\n\t") // 0.625 - 1 ~ 10
 
 // Video out voltage levels
 //                 RGBS
 #define _SYNC    0b0000
-#define _BLACK   0b0001
+#define _BLACK   0b0001 // lo usamos tambien como HSYNC
 #define _BLUE    0b0011
 #define _GREEN   0b0101
 #define _RED     0b1001
@@ -23,7 +50,7 @@
 
 // dimensions of the screen
 //number of lines to display
-#define DISPLAY_LINES 240
+#define DISPLAY_LINES 305
 #define WIDTH  84
 #define HEIGHT 60
 
@@ -60,35 +87,52 @@ void setup() {
   digitalWrite (G_PIN, HIGH);
   digitalWrite (B_PIN, HIGH);
 
-  //Serial.println( val);
 }
 
 
-int i = 0;
-
 void loop() {
- int line = 0;
+ //register unsigned -- cambiando a registro gano tiempo por si fuera necesario para animar.
+  
+ register unsigned time;
+ register int line = 0;
  
  while(1){
     CRTSyncTop(); // lineas de 1-5
-    // 6-310 (305 lines):
-    for( line = 0; line < 305; line++)
+    // 6-310 (305 lineas):
+    for( line = 0; line < DISPLAY_LINES;)
     {
-      hsync_pulse();
+      #ifdef DEBUG
+        time = micros();
+      #endif
       
-      PORTB = _RED; delayMicroseconds(9);
-      PORTB = _BLUE; delayMicroseconds(6);
-      PORTB = _GREEN; delayMicroseconds(6);
-      PORTB = _WHITE; delayMicroseconds(6);
-      PORTB = _BLACK; delayMicroseconds(6);
-      PORTB = _MAGENTA; delayMicroseconds(6);
-      PORTB = _CYAN; delayMicroseconds(7);
-      PORTB = _YELLOW; delayMicroseconds(7);
+      hsync_pulse();
+      delayMicroseconds(3); NOP; // sobran 3.5ms
+      
+      RenderBars();
+      line++;
+ 
+      delayMicroseconds(3); NOP; // sobran 3.5ms
+ 
+      #ifdef DEBUG
+        time = micros() - time;
+        Serial.println(time, DEC);
+        delay(1000);
+      #endif
     }
     CRTSyncFooter(); // lineas de 311-312
   }
 }
 
+inline void RenderBars() { // 64ms disponibles
+      PORTB = _RED; delayMicroseconds(6);
+      PORTB = _BLUE; delayMicroseconds(6);
+      PORTB = _GREEN; delayMicroseconds(6);
+      PORTB = _WHITE; delayMicroseconds(6);
+      PORTB = _BLACK; delayMicroseconds(6);
+      PORTB = _MAGENTA; delayMicroseconds(6);
+      PORTB = _CYAN; delayMicroseconds(6);
+      PORTB = _YELLOW; delayMicroseconds(6);
+}
 
 inline void CRTSyncTop(){
   // linea 1:
@@ -147,7 +191,7 @@ inline void hsync_pulse()
   PORTB = _SYNC;
   delayMicroseconds(4); DELAY_07;
      
-  // Back Porch 5.6 microseconds. -- cambiado a 5.7 y ok
+  // Back Porch 5.6 microseconds. -- cambiado a 5.7 y ok -- subido el delay un microsegundo mas para tener mas rojo.
   PORTB = _BLACK;
   delayMicroseconds(5); DELAY_07;
 }
