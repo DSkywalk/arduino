@@ -1,12 +1,13 @@
+//#define DEBUG 1
+
 // NOP = 1 ciclo = 1/16 us = 62.5ns
 #define NOP __asm __volatile ("nop")
 
-// Delay = 0.375 us
-void NOPF()
-{
-  NOP;NOP;NOP;NOP;NOP;NOP;
-}
-void DrawBars();
+// Delay: decimal us
+#define DELAY_03  __asm __volatile ("nop\n\t""nop\n\t""nop\n\t""nop\n\t") // 4.8 - 1 ~ 4
+#define DELAY_035 __asm __volatile ("nop\n\t""nop\n\t""nop\n\t""nop\n\t""nop\n\t") // 5.6 - 1 ~ 5
+#define DELAY_065 __asm __volatile ("nop\n\t""nop\n\t""nop\n\t""nop\n\t""nop\n\t""nop\n\t""nop\n\t""nop\n\t""nop\n\t") // 10.4 - 1 ~ 9
+#define DELAY_07  __asm __volatile ("nop\n\t""nop\n\t""nop\n\t""nop\n\t""nop\n\t""nop\n\t""nop\n\t""nop\n\t""nop\n\t""nop\n\t") // 11.2 - 1 ~ 10
 
 // Video out voltage levels
 //                 RGBS
@@ -28,8 +29,6 @@ void DrawBars();
 
 // the video frameBuffer
 byte frameBuffer[WIDTH];
-// pal video line loop
-byte line;
 int val;
 
 //video pins
@@ -43,11 +42,14 @@ int val;
 
 
 void setup() {
+  #ifndef DEBUG
   cli();
+  #else
   // put your setup code here, to run once:
   Serial.begin(9600);
   Serial.println("SETUP STARTS!");
- 
+  #endif
+  
   pinMode (SYNC_PIN, OUTPUT);
   pinMode (R_PIN, OUTPUT);
   pinMode (G_PIN, OUTPUT);
@@ -57,219 +59,96 @@ void setup() {
   digitalWrite (R_PIN, HIGH);
   digitalWrite (G_PIN, HIGH);
   digitalWrite (B_PIN, HIGH);
-  line = 0;
 
-  //DrawBars();
-  val = analogRead(6);
   //Serial.println( val);
 }
 
+
+int i = 0;
+
 void loop() {
-  line++;
-  // HSync
-  // front porch (1.5 us)
-  PORTB = _BLACK;
-  delayMicroseconds(1.5);
-
-  //sync (4.7 us)
-  PORTB = _SYNC;
-  delayMicroseconds(4.7);
-
-  // breezeway (.6us) + burst (2.5us) + colour back borch (1.6 us)
-  PORTB = _BLACK;
-  delayMicroseconds(0.6+2.5+1.6);
-    
-    delayMicroseconds(3); 
-    PORTB = _RED; delayMicroseconds(2); PORTB = _RED; delayMicroseconds(2); PORTB = _RED; delayMicroseconds(2);
-    PORTB = _RED; delayMicroseconds(2); PORTB = _RED; delayMicroseconds(2); PORTB = _RED; delayMicroseconds(2);
-    PORTB = _RED; delayMicroseconds(2); PORTB = _RED; delayMicroseconds(2); PORTB = _RED; delayMicroseconds(2);
-
-    PORTB = _BLUE; delayMicroseconds(2); PORTB = _BLUE; delayMicroseconds(2); PORTB = _BLUE; delayMicroseconds(2);
-    PORTB = _BLUE; delayMicroseconds(2); PORTB = _BLUE; delayMicroseconds(2); PORTB = _BLUE; delayMicroseconds(2);
-    PORTB = _BLUE; delayMicroseconds(2); PORTB = _BLUE; delayMicroseconds(2); PORTB = _BLUE; delayMicroseconds(2);
-
-    PORTB = _GREEN; delayMicroseconds(2); PORTB = _GREEN; delayMicroseconds(2); PORTB = _GREEN; delayMicroseconds(2);
-    PORTB = _GREEN; delayMicroseconds(2); PORTB = _GREEN; delayMicroseconds(2); PORTB = _GREEN; delayMicroseconds(2);
-    PORTB = _GREEN; delayMicroseconds(2); PORTB = _GREEN; delayMicroseconds(2); PORTB = _GREEN; delayMicroseconds(2);
-
-  delayMicroseconds(3);
-
-  if(line >= DISPLAY_LINES){
-    //vsync
-    PORTB = _SYNC;
-    //delayMicroseconds(1);
-    //delayMicroseconds(analogRead(6)+500);
-    delayMicroseconds(val+500);
-    NOPF(); NOPF();NOPF();NOPF();NOPF();NOPF();NOPF();NOPF();NOPF();NOPF();
-    NOPF(); NOPF();NOPF();NOPF();NOPF();NOPF();NOPF();NOPF();NOPF();NOPF();
-    NOPF(); NOPF();NOPF();NOPF();NOPF();NOPF();NOPF();NOPF();NOPF();NOPF();
-    NOPF(); NOPF();NOPF();NOPF();NOPF();NOPF();NOPF();NOPF();NOPF();NOPF();
-    NOPF(); NOPF();NOPF();NOPF();NOPF();NOPF();NOPF();NOPF();NOPF();NOPF();
-    NOPF(); NOPF();NOPF();NOPF();NOPF();NOPF();NOPF();NOPF();NOPF();NOPF();
-    NOPF(); NOPF();NOPF();NOPF();NOPF();NOPF();NOPF();NOPF();NOPF();NOPF();
-    NOPF();NOPF();NOPF();NOPF();NOPF();
-    NOPF();NOPF();NOPF();NOPF();NOPF();
-    NOPF();NOPF();NOPF();NOPF();NOPF();
-    NOPF();NOPF();NOPF();NOPF();NOPF();
-    NOPF();NOPF();NOPF();NOPF();NOPF();
-    NOPF();NOPF();NOPF();NOPF();NOPF();
-    NOPF();NOPF();NOPF();NOPF();NOPF();
-    NOPF();NOPF();NOPF();NOPF();NOPF();
-    NOPF();NOPF();NOPF();NOPF();NOPF();
-    NOPF();NOPF();NOPF();NOPF();NOPF();
-    NOPF();NOPF();NOPF();NOPF();NOPF();
-    NOPF();NOPF();NOPF();NOPF();NOPF();
-    NOPF();NOPF();NOPF();NOPF();NOPF();
-    NOPF();NOPF();NOPF();NOPF();NOPF();
-    NOPF();NOPF();NOPF();NOPF();NOPF();
-    NOPF();NOPF();NOPF();NOPF();NOPF();
-    NOPF();NOPF();NOPF();NOPF();NOPF();
-    NOPF();NOPF();NOPF();NOPF();NOPF();
-
-    //delayMicroseconds(1286.9000);
-    line = 0;
-  }
-}
-
-
-
-/****************************/
-
-
-void paint2(){
-}
-
-void setPixel(byte x, byte y, byte color)
-{
-  frameBuffer[x] = color;
-}
-
-// Dibuja las barras de color
-void DrawBars()
-{
-  byte color;
-  int x,y;
-  for (x=0; x<WIDTH; x++)
-  {
-    switch(x/10)
+ int line = 0;
+ 
+ while(1){
+    CRTSyncTop(); // lineas de 1-5
+    // 6-310 (305 lines):
+    for( line = 0; line < 305; line++)
     {
-    case 0:
-      color = _WHITE;
-      break;
-    case 1:
-      color = _YELLOW;
-      break;
-    case 2:
-      color = _CYAN;
-      break;
-    case 3:
-      color = _GREEN;
-      break;
-    case 4:
-      color = _MAGENTA;
-      break;
-    case 5:
-      color = _RED;
-      break;
-    case 6:
-      color = _BLUE;
-      break;
-    default:
-      color = _BLACK;
-      break;
+      hsync_pulse();
+      
+      PORTB = _RED; delayMicroseconds(9);
+      PORTB = _BLUE; delayMicroseconds(6);
+      PORTB = _GREEN; delayMicroseconds(6);
+      PORTB = _WHITE; delayMicroseconds(6);
+      PORTB = _BLACK; delayMicroseconds(6);
+      PORTB = _MAGENTA; delayMicroseconds(6);
+      PORTB = _CYAN; delayMicroseconds(7);
+      PORTB = _YELLOW; delayMicroseconds(7);
     }
-      setPixel(x, 0, color);
+    CRTSyncFooter(); // lineas de 311-312
   }
 }
 
 
-void paint(){
-
-    PORTB = frameBuffer[0];NOPF();
-    PORTB = frameBuffer[1];NOPF();
-    PORTB = frameBuffer[2];NOPF();
-    PORTB = frameBuffer[3];NOPF();
-    PORTB = frameBuffer[4];NOPF();
-    PORTB = frameBuffer[5];NOPF();
-    PORTB = frameBuffer[6];NOPF();
-    PORTB = frameBuffer[7];NOPF();
-    PORTB = frameBuffer[8];NOPF();
-    PORTB = frameBuffer[9];NOPF();
-    PORTB = frameBuffer[10];NOPF();
-    PORTB = frameBuffer[11];NOPF();
-    PORTB = frameBuffer[12];NOPF();
-    PORTB = frameBuffer[13];NOPF();
-    PORTB = frameBuffer[14];NOPF();
-    PORTB = frameBuffer[15];NOPF();
-    PORTB = frameBuffer[16];NOPF();
-    PORTB = frameBuffer[17];NOPF();
-    PORTB = frameBuffer[18];NOPF();
-    PORTB = frameBuffer[19];NOPF();
-    PORTB = frameBuffer[20];NOPF();
-    PORTB = frameBuffer[21];NOPF();
-    PORTB = frameBuffer[22];NOPF();
-    PORTB = frameBuffer[23];NOPF();
-    PORTB = frameBuffer[24];NOPF();
-    PORTB = frameBuffer[25];NOPF();
-    PORTB = frameBuffer[26];NOPF();
-    PORTB = frameBuffer[27];NOPF();
-    PORTB = frameBuffer[28];NOPF();
-    PORTB = frameBuffer[29];NOPF();
-    PORTB = frameBuffer[30];NOPF();
-    PORTB = frameBuffer[31];NOPF();
-    PORTB = frameBuffer[32];NOPF();
-    PORTB = frameBuffer[33];NOPF();
-    PORTB = frameBuffer[34];NOPF();
-    PORTB = frameBuffer[35];NOPF();
-    PORTB = frameBuffer[36];NOPF();
-    PORTB = frameBuffer[37];NOPF();
-    PORTB = frameBuffer[38];NOPF();
-    PORTB = frameBuffer[39];NOPF();
-    PORTB = frameBuffer[40];NOPF();
-    PORTB = frameBuffer[41];NOPF();
-    PORTB = frameBuffer[42];NOPF();
-    PORTB = frameBuffer[43];NOPF();
-    PORTB = frameBuffer[44];NOPF();
-    PORTB = frameBuffer[45];NOPF();
-    PORTB = frameBuffer[46];NOPF();
-    PORTB = frameBuffer[47];NOPF();
-    PORTB = frameBuffer[48];NOPF();
-    PORTB = frameBuffer[49];NOPF();
-    PORTB = frameBuffer[50];NOPF();
-    PORTB = frameBuffer[51];NOPF();
-    PORTB = frameBuffer[52];NOPF();
-    PORTB = frameBuffer[53];NOPF();
-    PORTB = frameBuffer[54];NOPF();
-    PORTB = frameBuffer[55];NOPF();
-    PORTB = frameBuffer[56];NOPF();
-    PORTB = frameBuffer[57];NOPF();
-    PORTB = frameBuffer[58];NOPF();
-    PORTB = frameBuffer[59];NOPF();
-    PORTB = frameBuffer[60];NOPF();
-    PORTB = frameBuffer[61];NOPF();
-    PORTB = frameBuffer[62];NOPF();
-    PORTB = frameBuffer[63];NOPF();
-    PORTB = frameBuffer[64];NOPF();
-    PORTB = frameBuffer[65];NOPF();
-    PORTB = frameBuffer[66];NOPF();
-    PORTB = frameBuffer[67];NOPF();
-    PORTB = frameBuffer[68];NOPF();
-    PORTB = frameBuffer[69];NOPF();
-    PORTB = frameBuffer[70];NOPF();
-    PORTB = frameBuffer[71];NOPF();
-    PORTB = frameBuffer[72];NOPF();
-    PORTB = frameBuffer[73];NOPF();
-    PORTB = frameBuffer[74];NOPF();
-    PORTB = frameBuffer[75];NOPF();
-    PORTB = frameBuffer[76];NOPF();
-    PORTB = frameBuffer[77];NOPF();
-    PORTB = frameBuffer[78];NOPF();
-    PORTB = frameBuffer[79];NOPF();
-    PORTB = frameBuffer[80];NOPF();
-    PORTB = frameBuffer[81];NOPF();
-    PORTB = frameBuffer[82];NOPF();
-    PORTB = frameBuffer[83];NOPF();
+inline void CRTSyncTop(){
+  // linea 1:
+  vsync_pulse(); vsync_pulse();
+  // linea 2:
+  vsync_pulse(); vsync_pulse();
+  // linea 3:
+  vsync_pulse(); equal_pulse();
+  // linea 4:
+  equal_pulse(); equal_pulse();
+  // linea 5:
+  equal_pulse(); equal_pulse();
 }
 
 
+inline void CRTSyncFooter(){
+  // linea 311:
+  equal_pulse(); equal_pulse();
+  // linea 312:
+  equal_pulse(); equal_pulse();
+}
+
+///////////////////////////////////////////////////////
+
+inline void vsync_pulse()
+{
+  // Sync goes low and delay 27.3 microseconds
+  PORTB = _SYNC;
+  delayMicroseconds(27); DELAY_03;
+       
+  // Sync goes high and delay 4.7 microseconds
+  PORTB = _BLACK; 
+  delayMicroseconds(4); DELAY_07;
+  // 512 cliclos
+}
+
+inline void equal_pulse()
+{
+  // Sync pulse goes low and delay 2.3 microseconds
+  PORTB = _SYNC; 
+  delayMicroseconds(2); DELAY_03;
+     
+  // Sync pulse goes high and delay 29.7 microseconds
+  PORTB = _BLACK;
+  delayMicroseconds(29); DELAY_07;
+
+}
+
+inline void hsync_pulse()
+{
+  // Front Porch - high for 1.65 microseconds -- cambiado a 1.7 y ok!
+  PORTB = _BLACK;
+  delayMicroseconds(1); DELAY_07;
+      
+  // Generate sync pulse 4.7 microseconds
+  PORTB = _SYNC;
+  delayMicroseconds(4); DELAY_07;
+     
+  // Back Porch 5.6 microseconds. -- cambiado a 5.7 y ok
+  PORTB = _BLACK;
+  delayMicroseconds(5); DELAY_07;
+}
 
