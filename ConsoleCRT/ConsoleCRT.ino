@@ -1,5 +1,5 @@
 /********************************************************************************************/
-/*   ARDUINO NANO - TV 8 COLORES - PAL50HZ                                                  */
+/*   ARDUINO NANO - 8 COLOURS TV - PAL50HZ                                                  */
 /********************************************************************************************/
 
 /********************************************************************************************/
@@ -52,12 +52,11 @@
 // dimensions of the screen
 //number of lines to display
 #define DISPLAY_LINES 305
-#define WIDTH  84
-#define HEIGHT 60
+#define WIDTH  1
+#define HEIGHT 0
 
 // the video frameBuffer
 byte frameBuffer[WIDTH];
-int val;
 
 //video pins
 #define SYNC_PIN  8
@@ -71,7 +70,7 @@ int val;
 
 void setup() {
   #ifndef DEBUG
-  cli(); // interrupt mode off -- we need all cpu for the demo.
+  noInterrupts(); // interrupt mode off -- we need all cpu for the demo.
   #else
   Serial.begin(9600);
   Serial.println("SETUP STARTS!");
